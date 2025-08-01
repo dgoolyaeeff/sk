@@ -19,11 +19,22 @@ object Sk extends cask.MainRoutes:
         meta(charset:="UTF-8"),
         meta(httpEquiv:="X-UA-Compatible", content:="IE=edge"),
         meta(name:="viewport", content:="width=device-width, initial-scale=1.0"),
+        meta(name:="description", content:="ебейший таск трекер"),
         ttitle("sk"),
         link(rel:="stylesheet", href:="/s.css"),
       ),
       body(
-        
+        header(
+          button("новый таск?")
+        ),
+        tmain(
+          
+        ),
+        footer(
+          span("Дмитрий Гуляев, 2025, учебный проект"),
+          span("Почта - ", a(href:="mailto:workDmitriyGulyaev@yandex.ru")
+            ("workDmitriyGulyaev@yandex.ru"))
+        )
       )
     )
   initialize()
