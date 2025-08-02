@@ -16,15 +16,13 @@ object Sk extends cask.MainRoutes:
     a(href:="/add-task.html")("новый таск?"))
 
   val addingTskBtn = Seq(
-    a(href:="/")("передумал?")
-  )
+    a(href:="/")("передумал?"))
 
   def base(
     blr: Boolean = false, 
     addTasForm: Seq[Modifier] = Nil,
     addTasBtn: Seq[Modifier] = defaultAddTskBtn,
-    addTskForm: Seq[Modifier] = Nil
-    ) =
+    addTskForm: Seq[Modifier] = Nil) =
     html(lang:="ru")(
       head(
         meta(charset:="UTF-8"),
@@ -32,35 +30,27 @@ object Sk extends cask.MainRoutes:
         meta(name:="viewport", content:="width=device-width, initial-scale=1.0"),
         meta(name:="description", content:="ебейший таск трекер"),
         ttitle("sk"),
-        link(rel:="stylesheet", href:="/s.css"),
-      ),
+        link(rel:="stylesheet", href:="/s.css"),),
       body(
         header(cls:="hd")(
           button(cls:="add-task-btn")(
-            addTasBtn
-            )
-        ),
+            addTasBtn)),
         tmain(cls:= { if blr then "blur__page_task-add" else "" })(
           div(cls:="mainmatrix")(
             div(cls:="q q1")(
-              h2("Важно и срочно")
-            ),
+              h2("Важно и срочно")),
             div(cls:="q q2")(
-              h2("Важно но не срочно")
-            ),
+              h2("Важно но не срочно")),
             div(cls:="q q3")(
               h2("Не важно но срочно"),
-              h3("ммм?")
-            ),
+              h3("ммм?")),
             div(cls:="q q4")(
               h2("Не важно и не срочно"),
               h3("чеееел?")
             )
           )
         ),
-        section(
-          addTskForm
-        )
+        section(addTskForm)
       )
     )
 
@@ -72,7 +62,12 @@ object Sk extends cask.MainRoutes:
     blr=true,
     addTasBtn=addingTskBtn,
     addTskForm=Seq(
-      
+      div(cls:="task-form")(
+        div(cls:="form-header")(
+          h2("Добавим таск")
+        ),
+        form(id:="taskForm")
+      )
     )
     )
 
