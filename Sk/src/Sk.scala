@@ -25,7 +25,9 @@ object Sk extends cask.MainRoutes:
       ),
       body(
         header(cls:="hd")(
-          button(cls:="add-task-btn")("новый таск?")
+          button(cls:="add-task-btn")(
+            a(href:="https://google.com")(
+              "новый таск?"))
         ),
         tmain(
           div(cls:="mainmatrix")(
