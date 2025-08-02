@@ -24,16 +24,26 @@ object Sk extends cask.MainRoutes:
         link(rel:="stylesheet", href:="/s.css"),
       ),
       body(
-        header(
-          button("новый таск?")
+        header(cls:="hd")(
+          button(cls:="add-task-btn")("новый таск?")
         ),
         tmain(
-          
-        ),
-        footer(
-          span("Дмитрий Гуляев, 2025, учебный проект"),
-          span("Почта - ", a(href:="mailto:workDmitriyGulyaev@yandex.ru")
-            ("workDmitriyGulyaev@yandex.ru"))
+          div(cls:="mainmatrix")(
+            div(cls:="q q1")(
+              h2("Важно и срочно")
+            ),
+            div(cls:="q q2")(
+              h2("Важно но не срочно")
+            ),
+            div(cls:="q q3")(
+              h2("Не важно но срочно"),
+              h3("ммм?")
+            ),
+            div(cls:="q q4")(
+              h2("Не важно и не срочно"),
+              h3("чеееел?")
+            )
+          )
         )
       )
     )
