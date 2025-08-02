@@ -12,8 +12,19 @@ object Sk extends cask.MainRoutes:
     val content = os.read(path)
     content
   
-  @cask.get("/")
-  def h() =
+  val defaultAddTskBtn = Seq(
+    a(href:="/add-task.html")("новый таск?"))
+
+  val addingTskBtn = Seq(
+    a(href:="/")("передумал?")
+  )
+
+  def base(
+    blr: Boolean = false, 
+    addTasForm: Seq[Modifier] = Nil,
+    addTasBtn: Seq[Modifier] = defaultAddTskBtn,
+    addTskForm: Seq[Modifier] = Nil
+    ) =
     html(lang:="ru")(
       head(
         meta(charset:="UTF-8"),
@@ -26,10 +37,10 @@ object Sk extends cask.MainRoutes:
       body(
         header(cls:="hd")(
           button(cls:="add-task-btn")(
-            a(href:="https://google.com")(
-              "новый таск?"))
+            addTasBtn
+            )
         ),
-        tmain(
+        tmain(cls:= { if blr then "blur__page_task-add" else "" })(
           div(cls:="mainmatrix")(
             div(cls:="q q1")(
               h2("Важно и срочно")
@@ -46,7 +57,23 @@ object Sk extends cask.MainRoutes:
               h3("чеееел?")
             )
           )
+        ),
+        section(
+          addTskForm
         )
       )
     )
+
+  @cask.get("/")
+  def h() = base()
+
+  @cask.get("/add-task.html")
+  def hAddTask() = base(
+    blr=true,
+    addTasBtn=addingTskBtn,
+    addTskForm=Seq(
+      
+    )
+    )
+
   initialize()

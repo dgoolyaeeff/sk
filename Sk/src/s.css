@@ -45,3 +45,7 @@
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(67, 97, 238, 0.3);
 }
+
+.blur__page_task-add {
+  filter: blur(3px);
+}
