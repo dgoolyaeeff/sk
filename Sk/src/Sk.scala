@@ -30,7 +30,7 @@ object Sk extends cask.MainRoutes:
         meta(name:="viewport", content:="width=device-width, initial-scale=1.0"),
         meta(name:="description", content:="ебейший таск трекер"),
         ttitle("sk"),
-        link(rel:="stylesheet", href:="/s.css"),),
+        link(rel:="stylesheet", href:="/s.css")),
       body(
         header(cls:="hd")(
           button(cls:="add-task-btn")(
@@ -66,9 +66,75 @@ object Sk extends cask.MainRoutes:
         div(cls:="form-header")(
           h2("Добавим таск")
         ),
-        form(id:="taskForm")
+        form(id:="taskForm")(
+          div(cls:="form-group")(
+            input(
+              `type`:="text", 
+              cls:="form-control",
+              id:="task-title",
+              placeholder:="Название таска",
+              required
+              )
+          ),
+          div(cls:="form-group")(
+            textarea(
+              cls:="form-control", 
+              id:="taskDesc",
+              placeholder:="Описание"
+            )
+          ),
+          div(
+            cls:="form-group"
+          )(
+            label(
+              `for`:="prior"
+            )("Категория:"),
+            select(
+              cls:="form-control",
+              id:="prior"
+            )(
+              option(value:="red")("красный"),
+              option(value:="green")("зелёный"),
+              option(value:="brown")("коричневый"),
+              option(value:="yellow")("жёлтый")
+            )
+          ),
+          div(
+            cls:="form-group"
+          )(
+            label(`for`:="taskDeadline")("Дедлайн:"),
+            input(
+              `type`:="date",
+              cls:="form-control",
+              id:="task-deadline"
+            )
+          ),
+          div(
+            cls:="taskRoadmap"
+          )(
+            div(cls:="taskRoadmapHeader")(
+              div(cls:="taskRoadmapTitle")(
+                "Дорожная карта таска:"
+              ),
+              button(
+                `type`:="button",
+                cls:="addPodtaskBtn",
+                id:="addPodtaskBtnId"
+              )("Добавим подтаск?")
+            ),
+            div(
+              cls:="podtaskContainer",
+              id:="podtaskContainer"
+            )(
+              // сюда будут добавляться подтаски!
+            )
+          ),
+          button(
+            `type`:="submit",
+            cls:="submit-btn"
+          )("Добавить таск!")
+        ) 
       )
     )
-    )
-
+  )
   initialize()
