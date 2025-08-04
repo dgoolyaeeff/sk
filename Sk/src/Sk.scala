@@ -5,7 +5,7 @@ import scalatags.Text.tags2.{section, title => ttitle, main => tmain}
 import cask.*
 
 object Sk extends cask.MainRoutes:
-  var task = ujson.Obj()
+  var tasks = List[Task]()
 
   @cask.get("/s.css")
   def s() = 
@@ -160,12 +160,20 @@ object Sk extends cask.MainRoutes:
     color: String,
     ddln: String
   ) = 
-    task = ujson.Obj(
+    val taskjson = ujson.Obj(
       "name" -> taskName,
       "desc" -> taskDesc,
       "color" -> color,
       "ddln" -> ddln
-    )
+    ).str
+
+    val taskstr: ujson.Value = ujson.read(taskjson)
+    tasks.::(Task(
+      taskstr("name").str,
+      taskstr("desc").str,
+      taskstr("color").str,
+      taskstr("ddln").str))
+
     Response(
       "",
       statusCode = 302,
