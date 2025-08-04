@@ -5,6 +5,8 @@ import scalatags.Text.tags2.{section, title => ttitle, main => tmain}
 import cask.*
 
 object Sk extends cask.MainRoutes:
+  var task = ujson.Obj()
+
   @cask.get("/s.css")
   def s() = 
     val path =
@@ -157,12 +159,18 @@ object Sk extends cask.MainRoutes:
     taskDesc: String,
     color: String,
     ddln: String
-  ) = ujson.Obj(
-    "name" -> taskName,
-    "desc" -> taskDesc,
-    "color" -> color,
-    "ddln" -> ddln
-  )
+  ) = 
+    task = ujson.Obj(
+      "name" -> taskName,
+      "desc" -> taskDesc,
+      "color" -> color,
+      "ddln" -> ddln
+    )
+    Response(
+      "",
+      statusCode = 302,
+      headers = Seq("Location" -> "/")
+    )
 
   initialize()
 end Sk
