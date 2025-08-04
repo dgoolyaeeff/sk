@@ -24,12 +24,18 @@ object Sk extends cask.MainRoutes:
         div(cls:="form-header")(
           h2("Добавим таск")
         ),
-        form(id:="taskForm")(
+        form(
+          id:="taskForm",
+          method:="post",
+          action:=
+            "http://localhost:8080/addTaskForm"
+        )(
           div(cls:="form-group")(
             input(
               `type`:="text", 
               cls:="form-control",
               id:="task-title",
+              name:="taskName",
               placeholder:="Название таска",
               required
               )
@@ -38,6 +44,7 @@ object Sk extends cask.MainRoutes:
             textarea(
               cls:="form-control", 
               id:="taskDesc",
+              name:="taskDesc",
               placeholder:="Описание"
             )
           ),
@@ -49,7 +56,8 @@ object Sk extends cask.MainRoutes:
             )("Категория:"),
             select(
               cls:="form-control",
-              id:="prior"
+              id:="prior",
+              name:="color"
             )(
               option(value:="red")("красный"),
               option(value:="green")("зелёный"),
@@ -64,7 +72,8 @@ object Sk extends cask.MainRoutes:
             input(
               `type`:="date",
               cls:="form-control",
-              id:="task-deadline"
+              id:="task-deadline",
+              name:="ddln"
             )
           ),
           div(
@@ -98,9 +107,9 @@ object Sk extends cask.MainRoutes:
 
   def base(
     blr: Boolean = false, 
-    addTasForm: Seq[Modifier] = Nil,
+    addTasForm: Seq[Modifier] = Seq.empty,
     addTasBtn: Seq[Modifier] = defaultAddTskBtn,
-    addTskForm: Seq[Modifier] = Nil) =
+    addTskForm: Seq[Modifier] = Seq.empty) =
     html(lang:="ru")(
       head(
         meta(charset:="UTF-8"),
@@ -141,4 +150,26 @@ object Sk extends cask.MainRoutes:
     addTasBtn=addingTskBtn,
     addTskForm=initialTaskAdderH
   )
+
+  @cask.postForm("/addTaskForm")
+  def formEndpoint(
+    taskName: String,
+    taskDesc: String,
+    color: String,
+    ddln: String
+  ) = ujson.Obj(
+    "name" -> taskName,
+    "desc" -> taskDesc,
+    "color" -> color,
+    "ddln" -> ddln
+  )
+
   initialize()
+end Sk
+
+case class Task(
+  name: String,
+  desc: String,
+  color: String,
+  ddln: String
+)
