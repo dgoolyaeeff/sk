@@ -3,14 +3,26 @@ package Sk
 import scalatags.Text.all.*
 import scalatags.Text.tags2.{section, title => ttitle, main => tmain}
 import cask.*
+import upickle.default.*
+import scala.collection.mutable.Map
+import scala.util.Random
 
 object Sk extends cask.MainRoutes:
-  var tasks = List[Task]()
+  var tasks = Map[Int, Task]()
+  val jsonpath = os.pwd / "Sk" / "src" / "tasks.json"
+
+  def init() =
+    val maindir = os.pwd / "Sk" / "src" 
+    if (os.list(maindir) contains "tasks.json")
+      then tasks = read[Map[Int, Task]](os.read(jsonpath))
+      else ()
+  Sk.init()
+
 
   @cask.get("/s.css")
   def s() = 
     val path =
-      os.root / "home" / "dimany" / "th" / "all_src" / "mid" / "sk" / "Sk" / "src" / "s.css"
+      os.pwd / "Sk" / "src" / "s.css"
     val content = os.read(path)
     content
   
@@ -155,24 +167,28 @@ object Sk extends cask.MainRoutes:
 
   @cask.postForm("/addTaskForm")
   def formEndpoint(
-    taskName: String,
-    taskDesc: String,
-    color: String,
-    ddln: String
+    taskName: FormValue,
+    taskDesc: FormValue,
+    color: FormValue,
+    ddln: FormValue
   ) = 
-    val taskjson = ujson.Obj(
-      "name" -> taskName,
-      "desc" -> taskDesc,
-      "color" -> color,
-      "ddln" -> ddln
-    ).str
 
-    val taskstr: ujson.Value = ujson.read(taskjson)
-    tasks.::(Task(
-      taskstr("name").str,
-      taskstr("desc").str,
-      taskstr("color").str,
-      taskstr("ddln").str))
+    var taskId = Random.nextInt(1000)
+    if (tasks contains taskId) then {
+      while(tasks contains taskId) do taskId = Random.nextInt(1000)
+    } else ()
+
+    tasks = tasks + ((taskId, Task(
+      taskName.value,
+      taskDesc.value,
+      color.value,
+      ddln.value)))
+
+    os.write.over(
+      jsonpath, 
+      write(tasks)
+    )
+
 
     Response(
       "",
@@ -181,6 +197,9 @@ object Sk extends cask.MainRoutes:
     )
 
   initialize()
+
+  // @cask.beforeShutdown
+  // def bS() = println("bb")
 end Sk
 
 case class Task(
@@ -188,4 +207,4 @@ case class Task(
   desc: String,
   color: String,
   ddln: String
-)
+) derives ReadWriter
