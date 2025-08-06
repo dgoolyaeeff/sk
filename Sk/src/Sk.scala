@@ -34,17 +34,16 @@ object Sk extends cask.MainRoutes:
   def tskViewAtMatrix(tsk: Task): Seq[Modifier] = Seq(
     div(cls:="taskAtMatrix")(
       a(href:="/edit-task.html")(
-        tsk.name)
+        h3(tsk.name)
       )
-  )
+    )
+  )    
 
-  def addTsks(t: Map[Int, Task])(clr: String): Seq[Modifier] = 
-    val localMap = t.filter(((_, x) => if x.color == clr then true else false))
+  def matrixTasks(clr: String): Seq[Modifier] = 
     var resSeq: Seq[Modifier] = Seq()
-    val step = localMap.map((_, x: Task) => tskViewAtMatrix(x))
-    for elem <- step do resSeq :++ elem
+    for elem <- tasks do elem match
+      case (_, x) => if x.color == clr then resSeq :++ tskViewAtMatrix(x) else ()
     resSeq
-    
 
   val initialTaskAdderH = Seq(
     div(cls:="task-form-overlay")(
@@ -133,14 +132,12 @@ object Sk extends cask.MainRoutes:
     )
   )
 
-  val ft = addTsks(tasks)
 
   def base(
     blr: Boolean = false, 
     addTasForm: Seq[Modifier] = Seq.empty,
     addTasBtn: Seq[Modifier] = defaultAddTskBtn,
     addTskForm: Seq[Modifier] = Seq.empty,
-    addTsksToMatrix: (String) => Seq[Modifier] = ft
     ) =
     html(lang:="ru")(
       head(
@@ -158,18 +155,21 @@ object Sk extends cask.MainRoutes:
           div(cls:="mainmatrix")(
             div(cls:="q q1")(
               h2("Важно и срочно"),
-              addTsksToMatrix("red")),
+              matrixTasks("red")
+            ),
             div(cls:="q q2")(
               h2("Важно но не срочно"),
-              addTsksToMatrix("green")),
+              matrixTasks("green")
+            ),
             div(cls:="q q3")(
               h2("Не важно но срочно"),
               h3("ммм?"),
-              addTsksToMatrix("brown")),
+              matrixTasks("brown")
+            ),
             div(cls:="q q4")(
               h2("Не важно и не срочно"),
               h3("чеееел?"),
-              addTsksToMatrix("yellow")
+              matrixTasks("yellow")
             )
           )
         ),
