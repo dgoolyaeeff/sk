@@ -5,22 +5,35 @@ import scalatags.Text.tags2.{section, title => ttitle, main => tmain}
 import cask.*
 import upickle.default.*
 import scala.collection.mutable.Map
-import scala.util.Random
+import scala.util.{Random,Try,Success,Failure}
 import scala.annotation.tailrec
 
 object Sk extends cask.MainRoutes:
-  var tasks = Map[Int, Task]()
+  //var tasks = Map[Int, Task]()
   val jsonpath = os.pwd / "Sk" / "src" / "tasks.json"
 
   // переделать с фпшной обработкой ошибок
-  def init() =
-    val maindir = os.pwd / "Sk" / "src"
-    println(os.list(maindir)) 
-    if (os.list(maindir) contains "tasks.json")
-      then tasks = read[Map[Int, Task]](os.read(jsonpath))
-      else ()
-    println(tasks)
-  Sk.init()
+  // def init() =
+  //   val maindir = os.pwd / "Sk" / "src"
+  //   println(os.list(maindir)) 
+  //   if (os.list(maindir) contains "tasks.json")
+  //     then tasks = read[Map[Int, Task]](os.read(jsonpath))
+  //     else ()
+  //   println(tasks)
+  // def mapInit(): [Map[Int, Task]] = 
+  //   try Some(read[Map[Int, Task]](os.read(jsonpath)))
+  //   catch case e: Exception => None
+  // var tasks = mapInit() match 
+  //   case Some(x) => x
+  //   case None => Map[Int, Task]()
+
+  def mapInit(): Map[Int, Task] =
+    Try(read[Map[Int, Task]](os.read(jsonpath))) match
+      case Success(x) => x
+      case Failure(_) => Map[Int, Task]()
+    
+  var tasks = mapInit()
+  
 
 
   @cask.get("/s.css")
