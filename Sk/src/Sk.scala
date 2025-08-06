@@ -6,16 +6,20 @@ import cask.*
 import upickle.default.*
 import scala.collection.mutable.Map
 import scala.util.Random
+import scala.annotation.tailrec
 
 object Sk extends cask.MainRoutes:
   var tasks = Map[Int, Task]()
   val jsonpath = os.pwd / "Sk" / "src" / "tasks.json"
 
+  // переделать с фпшной обработкой ошибок
   def init() =
-    val maindir = os.pwd / "Sk" / "src" 
+    val maindir = os.pwd / "Sk" / "src"
+    println(os.list(maindir)) 
     if (os.list(maindir) contains "tasks.json")
       then tasks = read[Map[Int, Task]](os.read(jsonpath))
       else ()
+    println(tasks)
   Sk.init()
 
 
@@ -173,10 +177,16 @@ object Sk extends cask.MainRoutes:
     ddln: FormValue
   ) = 
 
-    var taskId = Random.nextInt(1000)
-    if (tasks contains taskId) then {
-      while(tasks contains taskId) do taskId = Random.nextInt(1000)
-    } else ()
+    def createTaskId(t: Map[Int, Task]): Int =
+      @tailrec
+      def helper(ts: Map[Int, Task], guess: Int): Int=
+        if !(ts contains guess) then guess
+        else helper(ts, guess + 1)
+      helper(t, Random.nextInt(1000))
+
+    val taskId = createTaskId(tasks)
+
+    println(tasks)
 
     tasks = tasks + ((taskId, Task(
       taskName.value,
@@ -184,10 +194,14 @@ object Sk extends cask.MainRoutes:
       color.value,
       ddln.value)))
 
+    println(tasks)
+
     os.write.over(
       jsonpath, 
       write(tasks)
     )
+
+    println(tasks)
 
 
     Response(
@@ -198,8 +212,6 @@ object Sk extends cask.MainRoutes:
 
   initialize()
 
-  // @cask.beforeShutdown
-  // def bS() = println("bb")
 end Sk
 
 case class Task(
