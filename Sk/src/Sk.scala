@@ -9,23 +9,7 @@ import scala.util.{Random,Try,Success,Failure}
 import scala.annotation.tailrec
 
 object Sk extends cask.MainRoutes:
-  //var tasks = Map[Int, Task]()
   val jsonpath = os.pwd / "Sk" / "src" / "tasks.json"
-
-  // переделать с фпшной обработкой ошибок
-  // def init() =
-  //   val maindir = os.pwd / "Sk" / "src"
-  //   println(os.list(maindir)) 
-  //   if (os.list(maindir) contains "tasks.json")
-  //     then tasks = read[Map[Int, Task]](os.read(jsonpath))
-  //     else ()
-  //   println(tasks)
-  // def mapInit(): [Map[Int, Task]] = 
-  //   try Some(read[Map[Int, Task]](os.read(jsonpath)))
-  //   catch case e: Exception => None
-  // var tasks = mapInit() match 
-  //   case Some(x) => x
-  //   case None => Map[Int, Task]()
 
   def mapInit(): Map[Int, Task] =
     Try(read[Map[Int, Task]](os.read(jsonpath))) match
@@ -33,8 +17,6 @@ object Sk extends cask.MainRoutes:
       case Failure(_) => Map[Int, Task]()
     
   var tasks = mapInit()
-  
-
 
   @cask.get("/s.css")
   def s() = 
@@ -48,6 +30,21 @@ object Sk extends cask.MainRoutes:
 
   val addingTskBtn = Seq(
     a(href:="/")("передумал?"))
+
+  def tskViewAtMatrix(tsk: Task): Seq[Modifier] = Seq(
+    div(cls:="taskAtMatrix")(
+      a(href:="/edit-task.html")(
+        tsk.name)
+      )
+  )
+
+  def addTsks(t: Map[Int, Task])(clr: String): Seq[Modifier] = 
+    val localMap = t.filter(((_, x) => if x.color == clr then true else false))
+    var resSeq: Seq[Modifier] = Seq()
+    val step = localMap.map((_, x: Task) => tskViewAtMatrix(x))
+    for elem <- step do resSeq :++ elem
+    resSeq
+    
 
   val initialTaskAdderH = Seq(
     div(cls:="task-form-overlay")(
@@ -136,11 +133,15 @@ object Sk extends cask.MainRoutes:
     )
   )
 
+  val ft = addTsks(tasks)
+
   def base(
     blr: Boolean = false, 
     addTasForm: Seq[Modifier] = Seq.empty,
     addTasBtn: Seq[Modifier] = defaultAddTskBtn,
-    addTskForm: Seq[Modifier] = Seq.empty) =
+    addTskForm: Seq[Modifier] = Seq.empty,
+    addTsksToMatrix: (String) => Seq[Modifier] = ft
+    ) =
     html(lang:="ru")(
       head(
         meta(charset:="UTF-8"),
@@ -156,15 +157,19 @@ object Sk extends cask.MainRoutes:
         tmain(cls:= { if blr then "blur__page_task-add" else "" })(
           div(cls:="mainmatrix")(
             div(cls:="q q1")(
-              h2("Важно и срочно")),
+              h2("Важно и срочно"),
+              addTsksToMatrix("red")),
             div(cls:="q q2")(
-              h2("Важно но не срочно")),
+              h2("Важно но не срочно"),
+              addTsksToMatrix("green")),
             div(cls:="q q3")(
               h2("Не важно но срочно"),
-              h3("ммм?")),
+              h3("ммм?"),
+              addTsksToMatrix("brown")),
             div(cls:="q q4")(
               h2("Не важно и не срочно"),
-              h3("чеееел?")
+              h3("чеееел?"),
+              addTsksToMatrix("yellow")
             )
           )
         ),
@@ -179,8 +184,9 @@ object Sk extends cask.MainRoutes:
   def hAddTask() = base(
     blr=true,
     addTasBtn=addingTskBtn,
-    addTskForm=initialTaskAdderH
+    addTskForm=initialTaskAdderH,
   )
+  
 
   @cask.postForm("/addTaskForm")
   def formEndpoint(
