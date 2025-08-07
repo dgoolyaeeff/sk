@@ -253,7 +253,7 @@ object Sk extends cask.MainRoutes:
 
 end Sk
 
-enum PriorColor(val s: String) derives ReadWriter:
+enum PriorColor(val s: String):
   case Red extends PriorColor("red") 
   case Green extends PriorColor("green") 
   case Brown extends PriorColor("brown") 
@@ -265,6 +265,15 @@ object PriorColor:
     case "green" => PriorColor.Green
     case "brown" => PriorColor.Brown
     case "yellow" => PriorColor.Yellow
+
+  implicit val rw: ReadWriter[PriorColor] = 
+    upickle
+      .default
+      .readwriter[String]
+      .bimap[PriorColor](
+        clr => clr.s,
+        str => PriorColor(str)
+      )
 end PriorColor
 
 case class Task(
@@ -273,3 +282,14 @@ case class Task(
   color: PriorColor,
   ddln: String
 ) derives ReadWriter
+
+// object Task:
+//   implicit val rw: ReadWriter[Task] =
+//     upickle
+//       .default
+//       .readwriter[String]
+//       .bimap[Task](
+//         t => s"name:${t.name},desc:${t.desc},color:${t.color.s},ddln:${t.ddln}",
+        
+//       )
+// end Task
