@@ -34,16 +34,19 @@ object Sk extends cask.MainRoutes:
   def tskViewAtMatrix(tsk: Task): Seq[Modifier] = Seq(
     div(cls:="taskAtMatrix")(
       a(href:="/edit-task.html")(
-        h3(tsk.name)
+        h4(tsk.name)
       )
     )
-  )    
+  )
 
-  def matrixTasks(clr: String): Seq[Modifier] = 
-    var resSeq: Seq[Modifier] = Seq()
-    for elem <- tasks do elem match
-      case (_, x) => if x.color == clr then resSeq :++ tskViewAtMatrix(x) else ()
-    resSeq
+  //def filterTasks(clr: String): List[Task] = 
+  //  var resL = List[Task]()
+  //  tasks.ma
+  //  resL
+
+  //def matrixTasks(clr: String): Seq[Modifier] = 
+  //  val localTasks = tasks.filter(
+  //    ((_, ta) => if clr == ta.color then true else false))
 
   val initialTaskAdderH = Seq(
     div(cls:="task-form-overlay")(
@@ -155,21 +158,38 @@ object Sk extends cask.MainRoutes:
           div(cls:="mainmatrix")(
             div(cls:="q q1")(
               h2("Важно и срочно"),
-              matrixTasks("red")
+              //matrixTasks("red")
+              tasks
+                .filter((_, x) => x.color == PriorColor.Red)
+                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .toSeq
             ),
             div(cls:="q q2")(
               h2("Важно но не срочно"),
-              matrixTasks("green")
+              //matrixTasks("green")
+              tasks
+                .filter((_, x) => x.color == PriorColor.Green)
+                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .toSeq
             ),
             div(cls:="q q3")(
               h2("Не важно но срочно"),
               h3("ммм?"),
-              matrixTasks("brown")
+              //matrixTasks("brown")
+              tasks
+                .filter((_, x) => x.color == PriorColor.Brown)
+                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .toSeq
             ),
             div(cls:="q q4")(
               h2("Не важно и не срочно"),
               h3("чеееел?"),
-              matrixTasks("yellow")
+              //matrixTasks("yellow")
+              //filterTasks("yellow")
+              tasks
+                .filter((_, x) => x.color == PriorColor.Yellow)
+                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .toSeq
             )
           )
         ),
@@ -210,7 +230,7 @@ object Sk extends cask.MainRoutes:
     tasks = tasks + ((taskId, Task(
       taskName.value,
       taskDesc.value,
-      color.value,
+      PriorColor(color.value),
       ddln.value)))
 
     println(tasks)
@@ -233,9 +253,23 @@ object Sk extends cask.MainRoutes:
 
 end Sk
 
+enum PriorColor(val s: String) derives ReadWriter:
+  case Red extends PriorColor("red") 
+  case Green extends PriorColor("green") 
+  case Brown extends PriorColor("brown") 
+  case Yellow extends PriorColor("yellow")
+
+object PriorColor:
+  def apply(s: String): PriorColor = s match
+    case "red" => PriorColor.Red
+    case "green" => PriorColor.Green
+    case "brown" => PriorColor.Brown
+    case "yellow" => PriorColor.Yellow
+end PriorColor
+
 case class Task(
   name: String,
   desc: String,
-  color: String,
+  color: PriorColor,
   ddln: String
 ) derives ReadWriter
