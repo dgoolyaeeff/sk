@@ -45,7 +45,7 @@ object Sk extends cask.MainRoutes:
   def taskAdderH(
     finalFormMsg: String = "Добавим таск",
     formEndpoint: String = "/addTaskForm",
-    editingTask: Option[(Int, Task)],
+    editingTask: Option[Task],
   ): Seq[Modifier] = Seq(
     div(cls:="task-form-overlay")(
       div(cls:="task-form")(
@@ -67,7 +67,7 @@ object Sk extends cask.MainRoutes:
               required,
               value:=
                 (editingTask match
-                  case Some(_, t) => t.name
+                  case Some(t) => t.name
                   case None => ""
               )
             )
@@ -81,7 +81,7 @@ object Sk extends cask.MainRoutes:
               required
             )(
               editingTask match
-                case Some(_, t) => t.desc
+                case Some(t) => t.desc
                 case None => ""
             )
           ),
@@ -100,28 +100,28 @@ object Sk extends cask.MainRoutes:
               option(
                 value:="red",
                 editingTask match
-                  case Some(_, t) => 
+                  case Some(t) => 
                     if t.color == PriorColor.Red then selected else ()
                   case _ => ()
               )("красный"),
               option(
                 value:="green",
                 editingTask match
-                  case Some(_, t) =>
+                  case Some(t) =>
                     if t.color == PriorColor.Green then selected else ()
                   case _ => ()
               )("зелёный"),
               option(
                 value:="brown",
                 editingTask match
-                  case Some(_, t) =>
+                  case Some(t) =>
                     if t.color == PriorColor.Brown then selected else ()
                   case _ => ()
               )("коричневый"),
               option(
                 value:="yellow",
                 editingTask match
-                  case Some(_, t) =>
+                  case Some(t) =>
                     if t.color == PriorColor.Yellow then selected else ()
                   case _ => ()
               )("жёлтый")
@@ -139,7 +139,7 @@ object Sk extends cask.MainRoutes:
               required,
               value:=(
                 editingTask match
-                  case Some(_, t) => t.ddln
+                  case Some(t) => t.ddln
                   case None => ""
               )
             )
@@ -250,7 +250,7 @@ object Sk extends cask.MainRoutes:
       addTskForm=taskAdderH(
         finalFormMsg="Сохранить правки",
         formEndpoint=s"/edit/taskForm/$taskId",
-        editingTask=Some((taskId.toInt, tasks(taskId.toInt)))
+        editingTask=Some(tasks(taskId.toInt))
       )
     )
 
