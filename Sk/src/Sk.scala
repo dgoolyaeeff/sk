@@ -31,24 +31,22 @@ object Sk extends cask.MainRoutes:
   val addingTskBtn = Seq(
     a(href:="/")("передумал?"))
 
-  def tskViewAtMatrix(tsk: Task): Seq[Modifier] = Seq(
-    div(cls:="taskAtMatrix")(
-      a(href:="/edit-task.html")(
-        h4(tsk.name)
+  def tskViewAtMatrix(
+    currentTaskId: Int,
+    tsk: Task
+  ): Seq[Modifier] = Seq(
+      div(cls:="taskAtMatrix")(
+        a(href:=s"/edit/$currentTaskId")(    
+          tsk.name  
+        )
       )
-    )
-  )
+  ) 
 
-  //def filterTasks(clr: String): List[Task] = 
-  //  var resL = List[Task]()
-  //  tasks.ma
-  //  resL
-
-  //def matrixTasks(clr: String): Seq[Modifier] = 
-  //  val localTasks = tasks.filter(
-  //    ((_, ta) => if clr == ta.color then true else false))
-
-  val initialTaskAdderH = Seq(
+  def taskAdderH(
+    finalFormMsg: String = "Добавим таск",
+    formEndpoint: String = "/addTaskForm",
+    editingTask: Option[(Int, Task)],
+  ): Seq[Modifier] = Seq(
     div(cls:="task-form-overlay")(
       div(cls:="task-form")(
         div(cls:="form-header")(
@@ -57,8 +55,7 @@ object Sk extends cask.MainRoutes:
         form(
           id:="taskForm",
           method:="post",
-          action:=
-            "http://localhost:8080/addTaskForm"
+          action:=formEndpoint
         )(
           div(cls:="form-group")(
             input(
@@ -67,15 +64,25 @@ object Sk extends cask.MainRoutes:
               id:="task-title",
               name:="taskName",
               placeholder:="Название таска",
-              required
+              required,
+              value:=
+                (editingTask match
+                  case Some(_, t) => t.name
+                  case None => ""
               )
+            )
           ),
           div(cls:="form-group")(
             textarea(
               cls:="form-control", 
               id:="taskDesc",
               name:="taskDesc",
-              placeholder:="Описание"
+              placeholder:="Описание",
+              required
+            )(
+              editingTask match
+                case Some(_, t) => t.desc
+                case None => ""
             )
           ),
           div(
@@ -87,12 +94,37 @@ object Sk extends cask.MainRoutes:
             select(
               cls:="form-control",
               id:="prior",
-              name:="color"
+              name:="color",
+              required
             )(
-              option(value:="red")("красный"),
-              option(value:="green")("зелёный"),
-              option(value:="brown")("коричневый"),
-              option(value:="yellow")("жёлтый")
+              option(
+                value:="red",
+                editingTask match
+                  case Some(_, t) => 
+                    if t.color == PriorColor.Red then selected else ()
+                  case _ => ()
+              )("красный"),
+              option(
+                value:="green",
+                editingTask match
+                  case Some(_, t) =>
+                    if t.color == PriorColor.Green then selected else ()
+                  case _ => ()
+              )("зелёный"),
+              option(
+                value:="brown",
+                editingTask match
+                  case Some(_, t) =>
+                    if t.color == PriorColor.Brown then selected else ()
+                  case _ => ()
+              )("коричневый"),
+              option(
+                value:="yellow",
+                editingTask match
+                  case Some(_, t) =>
+                    if t.color == PriorColor.Yellow then selected else ()
+                  case _ => ()
+              )("жёлтый")
             )
           ),
           div(
@@ -103,7 +135,13 @@ object Sk extends cask.MainRoutes:
               `type`:="date",
               cls:="form-control",
               id:="task-deadline",
-              name:="ddln"
+              name:="ddln",
+              required,
+              value:=(
+                editingTask match
+                  case Some(_, t) => t.ddln
+                  case None => ""
+              )
             )
           ),
           div(
@@ -129,7 +167,7 @@ object Sk extends cask.MainRoutes:
           button(
             `type`:="submit",
             cls:="submit-btn"
-          )("Добавить таск!")
+          )(finalFormMsg)
         ) 
       )
     )
@@ -158,37 +196,32 @@ object Sk extends cask.MainRoutes:
           div(cls:="mainmatrix")(
             div(cls:="q q1")(
               h2("Важно и срочно"),
-              //matrixTasks("red")
               tasks
                 .filter((_, x) => x.color == PriorColor.Red)
-                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .map[Seq[Modifier]]((i, t) => tskViewAtMatrix(i, t))
                 .toSeq
             ),
             div(cls:="q q2")(
               h2("Важно но не срочно"),
-              //matrixTasks("green")
               tasks
                 .filter((_, x) => x.color == PriorColor.Green)
-                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .map[Seq[Modifier]]((i, t) => tskViewAtMatrix(i, t))
                 .toSeq
             ),
             div(cls:="q q3")(
               h2("Не важно но срочно"),
               h3("ммм?"),
-              //matrixTasks("brown")
               tasks
                 .filter((_, x) => x.color == PriorColor.Brown)
-                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .map[Seq[Modifier]]((i, t) => tskViewAtMatrix(i, t))
                 .toSeq
             ),
             div(cls:="q q4")(
               h2("Не важно и не срочно"),
               h3("чеееел?"),
-              //matrixTasks("yellow")
-              //filterTasks("yellow")
               tasks
                 .filter((_, x) => x.color == PriorColor.Yellow)
-                .map[Seq[Modifier]]((_, x) => tskViewAtMatrix(x))
+                .map[Seq[Modifier]]((i, t) => tskViewAtMatrix(i, t))
                 .toSeq
             )
           )
@@ -204,12 +237,26 @@ object Sk extends cask.MainRoutes:
   def hAddTask() = base(
     blr=true,
     addTasBtn=addingTskBtn,
-    addTskForm=initialTaskAdderH,
+    addTskForm=taskAdderH(
+      editingTask=None, 
+    )
   )
-  
+
+  @cask.get("/edit/:taskId")
+  def hEditTask(taskId: String) = 
+    base(
+      blr=true,
+      addTasBtn=addingTskBtn,
+      addTskForm=taskAdderH(
+        finalFormMsg="Сохранить правки",
+        formEndpoint=s"/edit/taskForm$taskId",
+        editingTask=Some((taskId.toInt, tasks(taskId.toInt)))
+      )
+    )
+
 
   @cask.postForm("/addTaskForm")
-  def formEndpoint(
+  def addFormEndpoint(
     taskName: FormValue,
     taskDesc: FormValue,
     color: FormValue,
@@ -221,11 +268,9 @@ object Sk extends cask.MainRoutes:
       def helper(ts: Map[Int, Task], guess: Int): Int=
         if !(ts contains guess) then guess
         else helper(ts, guess + 1)
-      helper(t, Random.nextInt(1000))
+      helper(t, Random.nextInt(1_000))
 
     val taskId = createTaskId(tasks)
-
-    println(tasks)
 
     tasks = tasks + ((taskId, Task(
       taskName.value,
@@ -233,15 +278,41 @@ object Sk extends cask.MainRoutes:
       PriorColor(color.value),
       ddln.value)))
 
-    println(tasks)
+    os.remove(jsonpath)
 
-    os.write.over(
+    os.write(
       jsonpath, 
       write(tasks)
     )
 
-    println(tasks)
+    Response(
+      "",
+      statusCode = 302,
+      headers = Seq("Location" -> "/")
+    )
 
+  @cask.postForm("/edit/taskForm:taskId")
+  def editFormEndpoint(
+    taskName: FormValue,
+    taskDesc: FormValue,
+    color: FormValue,
+    ddln: FormValue,
+    taskId: Int
+  ) =
+
+    tasks(taskId) = Task(
+      taskName.value,
+      taskDesc.value,
+      PriorColor(color.value),
+      ddln.value
+    )
+
+    os.remove(jsonpath)
+
+    os.write(
+      jsonpath, 
+      write(tasks)
+    )
 
     Response(
       "",
@@ -280,16 +351,5 @@ case class Task(
   name: String,
   desc: String,
   color: PriorColor,
-  ddln: String
+  ddln: String,
 ) derives ReadWriter
-
-// object Task:
-//   implicit val rw: ReadWriter[Task] =
-//     upickle
-//       .default
-//       .readwriter[String]
-//       .bimap[Task](
-//         t => s"name:${t.name},desc:${t.desc},color:${t.color.s},ddln:${t.ddln}",
-        
-//       )
-// end Task
