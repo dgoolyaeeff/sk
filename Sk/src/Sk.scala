@@ -249,7 +249,7 @@ object Sk extends cask.MainRoutes:
       addTasBtn=addingTskBtn,
       addTskForm=taskAdderH(
         finalFormMsg="Сохранить правки",
-        formEndpoint=s"/edit/taskForm$taskId",
+        formEndpoint=s"/edit/taskForm/$taskId",
         editingTask=Some((taskId.toInt, tasks(taskId.toInt)))
       )
     )
@@ -291,7 +291,7 @@ object Sk extends cask.MainRoutes:
       headers = Seq("Location" -> "/")
     )
 
-  @cask.postForm("/edit/taskForm:taskId")
+  @cask.postForm("/edit/taskForm/:taskId")
   def editFormEndpoint(
     taskName: FormValue,
     taskDesc: FormValue,
